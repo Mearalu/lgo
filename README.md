@@ -1,0 +1,2 @@
+# lgo
+go learn
