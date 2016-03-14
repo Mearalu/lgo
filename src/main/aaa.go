@@ -9,4 +9,7 @@ func main() {
 	s:=a[0:2]
 	fmt.Println(s)
 
+	c := 13
+	fmt.Println(string(c))
+
 }
