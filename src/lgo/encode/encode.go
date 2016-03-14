@@ -1,4 +1,4 @@
-package lencoding
+package encode
 
 import (
 	"io"
@@ -21,7 +21,7 @@ func ToUTF8Reader(r io.Reader, charset string)(io.Reader){
 		return r
 	}
 }
-func ToUTF8Byte(s *[]byte, charset string) ([]byte) {
+func ToUTF8Byte(s []byte, charset string) ([]byte) {
 	I := bytes.NewReader(s)
 	var O io.Reader
 	switch charset {

@@ -1,107 +1,31 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/axgle/mahonia"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
 	"regexp"
-	"strings"
-	"io"
+	"lgo"
 )
 
 
-/**
-url 指定url
-data post数据 "name=cjb"
-*/
 
-func httpPost(httpUrl string, data string) {
-	resp, err := http.Post(httpUrl,
-		"application/x-www-form-urlencoded",
-		strings.NewReader(data))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		// handle error
-	}
-
-	fmt.Println(string(body))
-}
-
-/**
-
- */
-func httpPostForm(httpUrl string) {
-	resp, err := http.PostForm(httpUrl,
-		url.Values{"key": {"Value"}, "id": {"123"}})
-
-	if err != nil {
-		// handle error
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		// handle error
-	}
-
-	fmt.Println(string(body))
-
-}
-
-func httpget(url string) {
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		log.Fatal(err)
-	}
-	if resp.StatusCode == http.StatusOK {
-		fmt.Println(resp.StatusCode)
-	}
-	defer resp.Body.Close()
-
-	buf := make([]byte, 1024)
-	f, err1 := os.OpenFile("path.txt", os.O_RDWR | os.O_CREATE | os.O_APPEND, os.ModePerm) //可读写，追加的方式打开（或创建文件）
-	if err1 != nil {
-		panic(err1)
-		return
-	}
-	defer f.Close()
-
-	for {
-		n, _ := resp.Body.Read(buf)
-		if 0 == n {
-			break
-		}
-		//f.WriteString(string(buf[:n]))
-		fmt.Println(string(buf[:n]))
-	}
-}
 func main() {
 	//httpget("http://www.lixinedu.com.cn/")
 
 	//headers := map[string]string{"Cookie": "name=anny"}
-	//httpDo("http://www.lixinedu.com.cn/", "", headers, "GET")
+	//r:=lgo.HttpDo("http://www.lixinedu.com.cn/", "", headers, "GET")
 
-	//httpDo("http://www.oschina.net/", "", headers, "GET")
+	//r:=lgo.HttpDoString("http://www.oschina.net/", "", headers, "GET")
+	//fmt.Println(r)
 	//
 	//d,_:=Decode([]byte(src))
 	//fmt.Println(d)
 	//fmt.Println(string(d))
 	//LiXin("http://www.lixinedu.com.cn")
-	Scrape()
+
+	Scrape("http://www.oschina.net/")
+	LiXin()
 
 	//regexTest()
 }
@@ -113,78 +37,36 @@ func mahoniaTest() {
 	fmt.Println(output)
 }
 
-func LiXin(httpurl string) {
-	doc, err := goquery.NewDocument(httpurl)
+func Scrape(httpUrl string) {
+	//doc, err := goquery.NewDocumentFromReader(lgo.HttpDo(httpUrl, "", nil, "GET"))
+	doc, err := goquery.NewDocumentFromResponse(lgo.HttpResp(httpUrl, "", nil, "GET"))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	doc.Find("div.block1_2_arc2").Each(func(i int, s *goquery.Selection) {
+	fmt.Println(doc.Url)
+	doc.Find("li.today  a").Each(func(i int, s *goquery.Selection) {
 		//band := s.Find("li").Text()
-		title := s.Find("a").Text()
+		title := s.Text()
+		url,_:=s.Attr("href")
 		d := []byte(title)
-		fmt.Printf("Review %d: - %s\n", i, d)
+		fmt.Printf("Review %d: url%s  - %s\n", i,url, d)
 	})
 }
 
-func Scrape() {
-	doc, err := goquery.NewDocumentFromReader(httpDo("http://www.lixinedu.com.cn/", "", nil, "GET"))
+func LiXin() {
+	doc, err := goquery.NewDocumentFromResponse(lgo.HttpGet("http://www.lixinedu.com.cn/"))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	doc.Find("div.block1_2_arc2").Each(func(i int, s *goquery.Selection) {
+	doc.Find("div.b3_2_2 li").Each(func(i int, s *goquery.Selection) {
 		title := s.Find("a").Text()
 		fmt.Printf("Review %d: - %s\n", i,  title)
 	})
 }
-/**
 
- */
 
-func Decode(s []byte) (rs []byte) {
-	I := bytes.NewReader(s)
-	O := transform.NewReader(I, simplifiedchinese.GBK.NewDecoder())
-	d, e := ioutil.ReadAll(O)
-	if e != nil {
-		fmt.Println(e)
-		return s
-	}
-	return d
-}
-func ToUTF8Reader(r io.Reader, charset string)(io.Reader){
-	switch charset {
-	case "gb2312", "GB2312":
-		return transform.NewReader(r, simplifiedchinese.HZGB2312.NewDecoder())
-	case "gbk", "GBK":
-		return transform.NewReader(r, simplifiedchinese.GBK.NewDecoder())
-	case "gb18030", "GB18030":
-		return transform.NewReader(r, simplifiedchinese.GB18030.NewDecoder())
-	default:
-		return r
-	}
-}
-
-func ToUTF8Byte(s *[]byte, charset string) ([]byte) {
-	I := bytes.NewReader(s)
-	var O io.Reader
-	switch charset {
-	case "gb2312", "GB2312":
-		O = transform.NewReader(I, simplifiedchinese.HZGB2312.NewDecoder())
-	case "gbk", "GBK":
-		O = transform.NewReader(I, simplifiedchinese.GBK.NewDecoder())
-	case "gb18030", "GB18030":
-		O = transform.NewReader(I, simplifiedchinese.GB18030.NewDecoder())
-	default:
-		return s
-	}
-	d, e := ioutil.ReadAll(O)
-	if e != nil {
-		fmt.Println(e)
-		return s
-	}
-	return d
-}
 func regexTest() {
 	str := ` <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
