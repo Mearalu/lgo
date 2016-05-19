@@ -1,25 +1,26 @@
 package lgo
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"lgo/encode"
+	"log"
 	"net/http"
 	"net/url"
-	"io/ioutil"
-	"fmt"
-	"regexp"
-	"io"
-	"strings"
-	"lgo/encode"
-	"bytes"
 	"os"
-	"log"
+	"regexp"
+	"strings"
 )
 
 var (
 	metaCharsetReg, _ = regexp.Compile(`<meta.+?charset=[^\w]?([-\w]+)`)
-	charsetReg, _ = regexp.Compile(`charset=[^\w]?([-\w]+)`)
+	charsetReg, _     = regexp.Compile(`charset=[^\w]?([-\w]+)`)
 )
-func HttpDoString(httpUrl string, data string, headers map[string]string, method string)(string){
-	r:= HttpDo(httpUrl,data,headers,method)
+
+func HttpDoString(httpUrl string, data string, headers map[string]string, method string) string {
+	r := HttpDo(httpUrl, data, headers, method)
 	d, e := ioutil.ReadAll(r)
 	if e != nil {
 		fmt.Println(e)
@@ -28,10 +29,10 @@ func HttpDoString(httpUrl string, data string, headers map[string]string, method
 	return string(d)
 }
 
-func HttpGet(httpUrl string)(res *http.Response){
-	return  HttpResp(httpUrl,"",nil,"GET")
+func HttpGet(httpUrl string) (res *http.Response) {
+	return HttpResp(httpUrl, "", nil, "GET")
 }
-func httpDo(httpUrl string, data string, headers map[string]string, method string) (res *http.Response,err error) {
+func httpDo(httpUrl string, data string, headers map[string]string, method string) (res *http.Response, err error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, httpUrl, strings.NewReader(data))
 	if err != nil {
@@ -50,15 +51,15 @@ func httpDo(httpUrl string, data string, headers map[string]string, method strin
 
 func HttpResp(httpUrl string, data string, headers map[string]string, method string) (res *http.Response) {
 	charset := "utf-8"
-	resp, err := httpDo(httpUrl,data,headers,method)
-	if(err!=nil){
+	resp, err := httpDo(httpUrl, data, headers, method)
+	if err != nil {
 		//
 	}
 	cs := charsetReg.FindSubmatch([]byte(resp.Header.Get("Content-Type")))
 	if len(cs) > 0 {
 		charset = string(cs[1])
-		resp.Body=ioutil.NopCloser(encode.ToUTF8Reader(resp.Body, charset))
-		return  resp;
+		resp.Body = ioutil.NopCloser(encode.ToUTF8Reader(resp.Body, charset))
+		return resp
 	}
 	defer resp.Body.Close()
 	////缓冲读取
@@ -78,13 +79,13 @@ func HttpResp(httpUrl string, data string, headers map[string]string, method str
 		charset = string(cs[1])
 	}
 	rs := encode.ToUTF8Byte(body, charset)
-	resp.Body=ioutil.NopCloser(bytes.NewReader(rs))
-	return  resp;
+	resp.Body = ioutil.NopCloser(bytes.NewReader(rs))
+	return resp
 }
-func HttpDo(httpUrl string, data string, headers map[string]string, method string) (io.Reader) {
+func HttpDo(httpUrl string, data string, headers map[string]string, method string) io.Reader {
 	charset := "utf-8"
-	resp, err := httpDo(httpUrl,data,headers,method)
-	if(err!=nil){
+	resp, err := httpDo(httpUrl, data, headers, method)
+	if err != nil {
 		//
 	}
 	cs := charsetReg.FindSubmatch([]byte(resp.Header.Get("Content-Type")))
@@ -100,7 +101,7 @@ func HttpDo(httpUrl string, data string, headers map[string]string, method strin
 		charset = string(cs[1])
 	}
 	rs := encode.ToUTF8Byte(body, charset)
-	return bytes.NewReader(rs);
+	return bytes.NewReader(rs)
 }
 
 func HttpPostForm(httpUrl string) {
@@ -155,7 +156,7 @@ func httpget(url string) {
 	defer resp.Body.Close()
 
 	buf := make([]byte, 1024)
-	f, err1 := os.OpenFile("path.txt", os.O_RDWR | os.O_CREATE | os.O_APPEND, os.ModePerm) //可读写，追加的方式打开（或创建文件）
+	f, err1 := os.OpenFile("path.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm) //可读写，追加的方式打开（或创建文件）
 	if err1 != nil {
 		panic(err1)
 		return

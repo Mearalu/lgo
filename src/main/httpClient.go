@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/axgle/mahonia"
-	"regexp"
 	"lgo"
+	"regexp"
 )
-
-
 
 func main() {
 	//httpget("http://www.lixinedu.com.cn/")
@@ -48,9 +46,9 @@ func Scrape(httpUrl string) {
 	doc.Find("li.today  a").Each(func(i int, s *goquery.Selection) {
 		//band := s.Find("li").Text()
 		title := s.Text()
-		url,_:=s.Attr("href")
+		url, _ := s.Attr("href")
 		d := []byte(title)
-		fmt.Printf("Review %d: url%s  - %s\n", i,url, d)
+		fmt.Printf("Review %d: url%s  - %s\n", i, url, d)
 	})
 }
 
@@ -62,10 +60,9 @@ func LiXin() {
 	}
 	doc.Find("div.b3_2_2 li").Each(func(i int, s *goquery.Selection) {
 		title := s.Find("a").Text()
-		fmt.Printf("Review %d: - %s\n", i,  title)
+		fmt.Printf("Review %d: - %s\n", i, title)
 	})
 }
-
 
 func regexTest() {
 	str := ` <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

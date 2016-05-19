@@ -3,7 +3,6 @@ package goquery
 import (
 	"fmt"
 	"log"
-
 	// In real use, this import would be required (not in this example, since it
 	// is part of the goquery package)
 	//"github.com/PuerkitoBio/goquery"

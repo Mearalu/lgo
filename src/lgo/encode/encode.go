@@ -1,15 +1,15 @@
 package encode
 
 import (
-	"io"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/encoding/simplifiedchinese"
 	"bytes"
-	"io/ioutil"
 	"fmt"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
+	"io"
+	"io/ioutil"
 )
 
-func ToUTF8Reader(r io.Reader, charset string)(io.Reader){
+func ToUTF8Reader(r io.Reader, charset string) io.Reader {
 	switch charset {
 	case "gb2312", "GB2312":
 		return transform.NewReader(r, simplifiedchinese.HZGB2312.NewDecoder())
@@ -21,7 +21,7 @@ func ToUTF8Reader(r io.Reader, charset string)(io.Reader){
 		return r
 	}
 }
-func ToUTF8Byte(s []byte, charset string) ([]byte) {
+func ToUTF8Byte(s []byte, charset string) []byte {
 	I := bytes.NewReader(s)
 	var O io.Reader
 	switch charset {
